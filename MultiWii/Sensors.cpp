@@ -6,7 +6,7 @@
 #include "Alarms.h"
 #include "EEPROM.h"
 #include "IMU.h"
-#include "LCD.h"
+//#include "LCD.h"
 
 void i2c_BMP085_UT_Start(void);
 

@@ -3,7 +3,7 @@
 #include "def.h"
 #include "types.h"
 #include "MultiWii.h"
-#include "LCD.h"
+//#include "LCD.h"
 #include "Sensors.h"
 #include "Alarms.h"
 
