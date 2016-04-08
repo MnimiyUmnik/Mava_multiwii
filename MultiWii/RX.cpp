@@ -215,38 +215,7 @@ void configureReceiver() {
     #endif
   #endif
   
-  /****************      atmega32u4's Throttle & Aux2 Pin      *******************/
-  #if defined(PROMICRO)
-    // throttle
-    ISR(INT6_vect){ 
-      static uint16_t now,diff;
-      static uint16_t last = 0;
-      now = micros();  
-      if(!(PINE & (1<<6))){
-        diff = now - last;
-        if(900<diff && diff<2200){
-          rcValue[3] = diff;
-          #if defined(FAILSAFE)
-           if(diff>FAILSAFE_DETECT_TRESHOLD) {        // if Throttle value is higher than FAILSAFE_DETECT_TRESHOLD
-             if(failsafeCnt > 20) failsafeCnt -= 20; else failsafeCnt = 0;   // If pulse present on THROTTLE pin (independent from ardu version), clear FailSafe counter  - added by MIS
-           }
-          #endif 
-        }
-      }else last = now; 
-    }
-    // Aux 2
-    #if defined(RCAUX2PINRXO)
-      ISR(INT2_vect){
-        static uint16_t now,diff;
-        static uint16_t last = 0; 
-        now = micros();  
-        if(!(PIND & (1<<2))){
-          diff = now - last;
-          if(900<diff && diff<2200) rcValue[7] = diff;
-        }else last = now;
-      }
-    #endif  
-  #endif
+  
 #endif
 
 
