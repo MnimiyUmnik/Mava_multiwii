@@ -6,7 +6,7 @@
 #include "Alarms.h"
 #include "EEPROM.h"
 #include "IMU.h"
-//#include "LCD.h"
+#include "LCD.h"
 
 void i2c_BMP085_UT_Start(void);
 
@@ -52,13 +52,72 @@ void ACC_init();
   //#define BMA180_ADDRESS 0x41
 #endif
 
+#if !defined(BMA280_ADDRESS) 
+  #define BMA280_ADDRESS 0x18 // SDO PIN on GND
+  //#define BMA280_ADDRESS 0x19  // SDO PIN on Vddio
+#endif
+
+#if !defined(ITG3200_ADDRESS) 
+  #define ITG3200_ADDRESS 0X68
+  //#define ITG3200_ADDRESS 0X69
+#endif
 
 #if !defined(MPU6050_ADDRESS)
   #define MPU6050_ADDRESS     0x68 // address pin AD0 low (GND), default for FreeIMU v0.4 and InvenSense evaluation board
   //#define MPU6050_ADDRESS     0x69 // address pin AD0 high (VCC)
 #endif
 
+#if !defined(LSM330_ACC_ADDRESS)
+  #define LSM330_ACC_ADDRESS     0x18 // 30 >> 1 = 18  -> address pin SDO_A low (GND)
+  //#define LSM330_ACC_ADDRESS     0x19 // 32 >> 1 = 19  -> address pin SDO_A high (VCC)
+#endif
 
+#if !defined(LSM330_GYRO_ADDRESS)
+  #define LSM330_GYRO_ADDRESS     0x6A // D4 >> 1 = 6A  -> address pin SDO_G low (GND)
+  //#define LSM330_GYRO_ADDRESS     0x6B // D6 >> 1 = 6B  -> address pin SDO_G high (VCC)
+#endif
+
+#if !defined(MPU3050_ADDRESS)
+  #define MPU3050_ADDRESS     0x68 // Switch in "ON" position
+  //#define MPU3050_ADDRESS     0x69 // Switch in "1" position
+#endif
+
+#if !defined(MS561101BA_ADDRESS) 
+  #define MS561101BA_ADDRESS 0x77 //CBR=0 0xEE I2C address when pin CSB is connected to LOW (GND)
+  //#define MS561101BA_ADDRESS 0x76 //CBR=1 0xEC I2C address when pin CSB is connected to HIGH (VCC)
+#endif
+
+//ITG3200 and ITG3205 Gyro LPF setting
+#if defined(ITG3200_LPF_256HZ) || defined(ITG3200_LPF_188HZ) || defined(ITG3200_LPF_98HZ) || defined(ITG3200_LPF_42HZ) || defined(ITG3200_LPF_20HZ) || defined(ITG3200_LPF_10HZ)
+  #if defined(ITG3200_LPF_256HZ)
+    #define ITG3200_SMPLRT_DIV 0  //8000Hz
+    #define ITG3200_DLPF_CFG   0
+  #endif
+  #if defined(ITG3200_LPF_188HZ)
+    #define ITG3200_SMPLRT_DIV 0  //1000Hz
+    #define ITG3200_DLPF_CFG   1
+  #endif
+  #if defined(ITG3200_LPF_98HZ)
+    #define ITG3200_SMPLRT_DIV 0
+    #define ITG3200_DLPF_CFG   2
+  #endif
+  #if defined(ITG3200_LPF_42HZ)
+    #define ITG3200_SMPLRT_DIV 0
+    #define ITG3200_DLPF_CFG   3
+  #endif
+  #if defined(ITG3200_LPF_20HZ)
+    #define ITG3200_SMPLRT_DIV 0
+    #define ITG3200_DLPF_CFG   4
+  #endif
+  #if defined(ITG3200_LPF_10HZ)
+    #define ITG3200_SMPLRT_DIV 0
+    #define ITG3200_DLPF_CFG   5
+  #endif
+#else
+    //Default settings LPF 256Hz/8000Hz sample
+    #define ITG3200_SMPLRT_DIV 0  //8000Hz
+    #define ITG3200_DLPF_CFG   0
+#endif
 
 //MPU6050 Gyro LPF setting
 #if defined(MPU6050_LPF_256HZ) || defined(MPU6050_LPF_188HZ) || defined(MPU6050_LPF_98HZ) || defined(MPU6050_LPF_42HZ) || defined(MPU6050_LPF_20HZ) || defined(MPU6050_LPF_10HZ) || defined(MPU6050_LPF_5HZ)
@@ -88,7 +147,33 @@ void ACC_init();
     #define MPU6050_DLPF_CFG   0
 #endif
 
-
+//MPU3050 Gyro LPF setting
+#if defined(MPU3050_LPF_256HZ) || defined(MPU3050_LPF_188HZ) || defined(MPU3050_LPF_98HZ) || defined(MPU3050_LPF_42HZ) || defined(MPU3050_LPF_20HZ) || defined(MPU3050_LPF_10HZ) || defined(MPU3050_LPF_5HZ)
+  #if defined(MPU3050_LPF_256HZ)
+    #define MPU3050_DLPF_CFG   0
+  #endif
+  #if defined(MPU3050_LPF_188HZ)
+    #define MPU3050_DLPF_CFG   1
+  #endif
+  #if defined(MPU3050_LPF_98HZ)
+    #define MPU3050_DLPF_CFG   2
+  #endif
+  #if defined(MPU3050_LPF_42HZ)
+    #define MPU3050_DLPF_CFG   3
+  #endif
+  #if defined(MPU3050_LPF_20HZ)
+    #define MPU3050_DLPF_CFG   4
+  #endif
+  #if defined(MPU3050_LPF_10HZ)
+    #define MPU3050_DLPF_CFG   5
+  #endif
+  #if defined(MPU3050_LPF_5HZ)
+    #define MPU3050_DLPF_CFG   6
+  #endif
+#else
+    //Default settings LPF 256Hz/8000Hz sample
+    #define MPU3050_DLPF_CFG   0
+#endif
 
 uint8_t rawADC[6];
 static uint32_t neutralizeTime = 0;
@@ -521,6 +606,145 @@ uint8_t Baro_update() {                   // first UT conversion is started in i
 }
 #endif
 
+// ************************************************************************************************************
+// I2C Barometer MS561101BA
+// ************************************************************************************************************
+//
+// specs are here: http://www.meas-spec.com/downloads/MS5611-01BA03.pdf
+// useful info on pages 7 -> 12
+#if defined(MS561101BA)
+
+// registers of the device
+#define MS561101BA_PRESSURE    0x40
+#define MS561101BA_TEMPERATURE 0x50
+#define MS561101BA_RESET       0x1E
+
+// OSR (Over Sampling Ratio) constants
+#define MS561101BA_OSR_256  0x00
+#define MS561101BA_OSR_512  0x02
+#define MS561101BA_OSR_1024 0x04
+#define MS561101BA_OSR_2048 0x06
+#define MS561101BA_OSR_4096 0x08
+
+#define OSR MS561101BA_OSR_4096
+
+static struct {
+  // sensor registers from the MS561101BA datasheet
+  uint16_t c[7];
+  union {uint32_t val; uint8_t raw[4]; } ut; //uncompensated T
+  union {uint32_t val; uint8_t raw[4]; } up; //uncompensated P
+  uint8_t  state;
+  uint32_t deadline;
+} ms561101ba_ctx;
+
+void i2c_MS561101BA_reset(){
+  i2c_writeReg(MS561101BA_ADDRESS, MS561101BA_RESET, 0);
+}
+
+void i2c_MS561101BA_readCalibration(){
+  union {uint16_t val; uint8_t raw[2]; } data;
+  for(uint8_t i=0;i<6;i++) {
+    i2c_rep_start(MS561101BA_ADDRESS<<1);
+    i2c_write(0xA2+2*i);
+    delay(10);
+    i2c_rep_start((MS561101BA_ADDRESS<<1) | 1);//I2C read direction => 1
+    delay(10);
+    data.raw[1] = i2c_readAck();  // read a 16 bit register
+    data.raw[0] = i2c_readNak();
+    ms561101ba_ctx.c[i+1] = data.val;
+  }
+}
+
+void  Baro_init() {
+  delay(10);
+  i2c_MS561101BA_reset();
+  delay(100);
+  i2c_MS561101BA_readCalibration();
+  delay(10);
+  i2c_MS561101BA_UT_Start(); 
+  ms561101ba_ctx.deadline = currentTime+10000; 
+}
+
+// read uncompensated temperature value: send command first
+void i2c_MS561101BA_UT_Start() {
+  i2c_rep_start(MS561101BA_ADDRESS<<1);      // I2C write direction
+  i2c_write(MS561101BA_TEMPERATURE + OSR);  // register selection
+  i2c_stop();
+}
+
+// read uncompensated pressure value: send command first
+void i2c_MS561101BA_UP_Start () {
+  i2c_rep_start(MS561101BA_ADDRESS<<1);      // I2C write direction
+  i2c_write(MS561101BA_PRESSURE + OSR);     // register selection
+  i2c_stop();
+}
+
+// read uncompensated pressure value: read result bytes
+void i2c_MS561101BA_UP_Read () {
+  i2c_rep_start(MS561101BA_ADDRESS<<1);
+  i2c_write(0);
+  i2c_rep_start((MS561101BA_ADDRESS<<1) | 1);
+  ms561101ba_ctx.up.raw[2] = i2c_readAck();
+  ms561101ba_ctx.up.raw[1] = i2c_readAck();
+  ms561101ba_ctx.up.raw[0] = i2c_readNak();
+}
+
+// read uncompensated temperature value: read result bytes
+void i2c_MS561101BA_UT_Read() {
+  i2c_rep_start(MS561101BA_ADDRESS<<1);
+  i2c_write(0);
+  i2c_rep_start((MS561101BA_ADDRESS<<1) | 1);
+  ms561101ba_ctx.ut.raw[2] = i2c_readAck();
+  ms561101ba_ctx.ut.raw[1] = i2c_readAck();
+  ms561101ba_ctx.ut.raw[0] = i2c_readNak();
+}
+
+void i2c_MS561101BA_Calculate() {
+  int32_t off2,sens2,delt;
+
+  int64_t dT       = (int32_t)ms561101ba_ctx.ut.val - ((int32_t)ms561101ba_ctx.c[5] << 8);
+  baroTemperature  = 2000 + ((dT * ms561101ba_ctx.c[6])>>23);
+  int64_t off      = ((uint32_t)ms561101ba_ctx.c[2] <<16) + ((dT * ms561101ba_ctx.c[4]) >> 7);
+  int64_t sens     = ((uint32_t)ms561101ba_ctx.c[1] <<15) + ((dT * ms561101ba_ctx.c[3]) >> 8);
+
+  if (baroTemperature < 2000) { // temperature lower than 20st.C 
+    delt = baroTemperature-2000;
+    delt  = 5*delt*delt;
+    off2  = delt>>1;
+    sens2 = delt>>2;
+    if (baroTemperature < -1500) { // temperature lower than -15st.C
+      delt  = baroTemperature+1500;
+      delt  = delt*delt;
+      off2  += 7 * delt;
+      sens2 += (11 * delt)>>1;
+    }
+    off  -= off2; 
+    sens -= sens2;
+  }
+
+  baroPressure     = (( (ms561101ba_ctx.up.val * sens ) >> 21) - off) >> 15;
+}
+
+//return 0: no data available, no computation ;  1: new value available  ; 2: no new value, but computation time
+uint8_t Baro_update() {                            // first UT conversion is started in init procedure
+  if (currentTime < ms561101ba_ctx.deadline) return 0; 
+  ms561101ba_ctx.deadline = currentTime+10000;  // UT and UP conversion take 8.5ms so we do next reading after 10ms 
+  TWBR = ((F_CPU / 400000L) - 16) / 2;          // change the I2C clock rate to 400kHz, MS5611 is ok with this speed
+  if (ms561101ba_ctx.state == 0) {
+    i2c_MS561101BA_UT_Read(); 
+    i2c_MS561101BA_UP_Start(); 
+    Baro_Common();                              // moved here for less timecycle spike
+    ms561101ba_ctx.state = 1;
+    return 1;
+  } else {
+    i2c_MS561101BA_UP_Read();
+    i2c_MS561101BA_UT_Start(); 
+    i2c_MS561101BA_Calculate();
+    ms561101ba_ctx.state = 0; 
+    return 2;
+  }
+}
+#endif
 
 #if BARO
   void Baro_Common() {
@@ -537,9 +761,53 @@ uint8_t Baro_update() {                   // first UT conversion is started in i
 #endif
 
 
+// ************************************************************************************************************
+// I2C Accelerometer MMA7455 
+// ************************************************************************************************************
+#if defined(MMA7455)
+void ACC_init () {
+  delay(10);
+  i2c_writeReg(MMA7455_ADDRESS,0x16,0x21);
+}
 
+void ACC_getADC () {
+  TWBR = ((F_CPU / 400000L) - 16) / 2;
+  i2c_getSixRawADC(MMA7455_ADDRESS,0x00);
 
+  ACC_ORIENTATION( ((int8_t(rawADC[1])<<8) | int8_t(rawADC[0])) ,
+                   ((int8_t(rawADC[3])<<8) | int8_t(rawADC[2])) ,
+                   ((int8_t(rawADC[5])<<8) | int8_t(rawADC[4])) );
+  ACC_Common();
+}
+#endif
 
+// ************************************************************************************************************
+// I2C Accelerometer MMA8451Q 
+// ************************************************************************************************************
+#if defined(MMA8451Q)
+
+#if !defined(MMA8451Q_ADDRESS)
+	#define MMA8451Q_ADDRESS 0x1C
+	//#define MMA8451Q_ADDRESS 0x1D
+#endif
+
+void ACC_init () {
+  delay(10);
+  i2c_writeReg(MMA8451Q_ADDRESS,0x2A,0x05); // wake up & low noise
+  delay(10);
+  i2c_writeReg(MMA8451Q_ADDRESS,0x0E,0x02); // full scale range
+}
+
+void ACC_getADC () {
+  TWBR = ((F_CPU / 400000L) - 16) / 2;
+  i2c_getSixRawADC(MMA8451Q_ADDRESS,0x00);
+
+  ACC_ORIENTATION( ((rawADC[1]<<8) | rawADC[0])/32 ,
+                   ((rawADC[3]<<8) | rawADC[2])/32 ,
+                   ((rawADC[5]<<8) | rawADC[4])/32);
+  ACC_Common();
+}
+#endif
 
 // ************************************************************************************************************
 // I2C Accelerometer ADXL345 
@@ -571,7 +839,180 @@ void ACC_getADC () {
 }
 #endif
 
+// ************************************************************************************************************
+// I2C Accelerometer BMA180
+// ************************************************************************************************************
+// I2C adress: 0x80 (8bit)    0x40 (7bit) (SDO connection to VCC) 
+// I2C adress: 0x82 (8bit)    0x41 (7bit) (SDO connection to VDDIO)
+// Resolution: 14bit
+//
+// Control registers:
+//
+// 0x20    bw_tcs:      |                                           bw<3:0> |                        tcs<3:0> |
+//                      |                                             150Hz |                        xxxxxxxx |
+// 0x30    tco_z:       |                                                tco_z<5:0>    |     mode_config<1:0> |
+//                      |                                                xxxxxxxxxx    |                   00 |
+// 0x35    offset_lsb1: |          offset_x<3:0>              |                   range<2:0>       | smp_skip |
+//                      |          xxxxxxxxxxxxx              |                    8G:   101       | xxxxxxxx |
+// ************************************************************************************************************
+#if defined(BMA180)
+void ACC_init () {
+  delay(10);
+  //default range 2G: 1G = 4096 unit.
+  i2c_writeReg(BMA180_ADDRESS,0x0D,1<<4); // register: ctrl_reg0  -- value: set bit ee_w to 1 to enable writing
+  delay(5);
+  uint8_t control = i2c_readReg(BMA180_ADDRESS, 0x20);
+  control = control & 0x0F;        // save tcs register
+  //control = control | (0x01 << 4); // register: bw_tcs reg: bits 4-7 to set bw -- value: set low pass filter to 20Hz
+  control = control | (0x00 << 4); // set low pass filter to 10Hz (bits value = 0000xxxx)
+  i2c_writeReg(BMA180_ADDRESS, 0x20, control);
+  delay(5);
+  control = i2c_readReg(BMA180_ADDRESS, 0x30);
+  control = control & 0xFC;        // save tco_z register
+  control = control | 0x00;        // set mode_config to 0
+  i2c_writeReg(BMA180_ADDRESS, 0x30, control);
+  delay(5); 
+  control = i2c_readReg(BMA180_ADDRESS, 0x35);
+  control = control & 0xF1;        // save offset_x and smp_skip register
+  control = control | (0x05 << 1); // set range to 8G
+  i2c_writeReg(BMA180_ADDRESS, 0x35, control);
+  delay(5); 
+}
 
+void ACC_getADC () {
+  TWBR = ((F_CPU / 400000L) - 16) / 2;  // Optional line.  Sensor is good for it in the spec.
+  i2c_getSixRawADC(BMA180_ADDRESS,0x02);
+  //usefull info is on the 14 bits  [2-15] bits  /4 => [0-13] bits  /4 => 12 bit resolution
+  ACC_ORIENTATION( ((rawADC[1]<<8) | rawADC[0])>>4 ,
+                   ((rawADC[3]<<8) | rawADC[2])>>4 ,
+                   ((rawADC[5]<<8) | rawADC[4])>>4 );
+  ACC_Common();
+}
+#endif
+
+// ************************************************************************************************************
+// I2C Accelerometer BMA280
+// ************************************************************************************************************
+#if defined(BMA280)
+void ACC_init () {
+  delay(10);
+  i2c_writeReg(BMA280_ADDRESS, 0x10, 0x09); //set BW to 15,63Hz
+  delay(5);
+  i2c_writeReg(BMA280_ADDRESS, 0x0F, 0x08); //set range to 8G
+}
+
+void ACC_getADC () {
+  TWBR = ((F_CPU / 400000L) - 16) / 2;
+  i2c_getSixRawADC(BMA280_ADDRESS,0x02);
+  //usefull info is on the 14 bits  [2-15] bits  /4 => [0-13] bits  /4 => 12 bit resolution
+  ACC_ORIENTATION( ((rawADC[1]<<8) | rawADC[0])>>4 ,
+                   ((rawADC[3]<<8) | rawADC[2])>>4 ,
+                   ((rawADC[5]<<8) | rawADC[4])>>4 );
+  ACC_Common();
+}
+#endif
+
+// ************************************************************************************************************
+// I2C Accelerometer BMA020
+// ************************************************************************************************************
+// I2C adress: 0x70 (8bit)
+// Resolution: 10bit
+// Control registers:
+//
+// Datasheet: After power on reset or soft reset it is recommended to set the SPI4-bit to the correct value.
+//            0x80 = SPI four-wire = Default setting
+// | 0x15: | SPI4 | enable_adv_INT | new_data_INT | latch_INT | shadow_dis | wake_up_pause<1:0> | wake_up |
+// |       |    1 |              0 |            0 |         0 |          0 |                 00 |       0 |
+//
+// | 0x14: |                       reserved <2:0> |            range <1:0> |               bandwith <2:0> |
+// |       |                      !!Calibration!! |                     2g |                         25Hz |
+//
+// ************************************************************************************************************
+#if defined(BMA020)
+void ACC_init(){
+  i2c_writeReg(0x38,0x15,0x80);    // set SPI4 bit
+  uint8_t control = i2c_readReg(0x70, 0x14);
+  control = control & 0xE0;        // save bits 7,6,5
+  control = control | (0x02 << 3); // Range 8G (10)
+  control = control | 0x00;        // Bandwidth 25 Hz 000
+  i2c_writeReg(0x38,0x14,control); 
+}
+
+void ACC_getADC(){
+  TWBR = ((F_CPU / 400000L) - 16) / 2;
+  i2c_getSixRawADC(0x38,0x02);
+  ACC_ORIENTATION( ((rawADC[1]<<8) | rawADC[0])>>6 ,
+                   ((rawADC[3]<<8) | rawADC[2])>>6 ,
+                   ((rawADC[5]<<8) | rawADC[4])>>6 );
+  ACC_Common();
+}
+#endif
+
+// ************************************************************************************************************
+// standalone I2C Nunchuk
+// ************************************************************************************************************
+#if defined(NUNCHACK)
+#define NUNCHACK_ADDRESS 0x52
+
+void ACC_init() {
+  i2c_writeReg(NUNCHACK_ADDRESS ,0xF0 ,0x55 );
+  i2c_writeReg(NUNCHACK_ADDRESS ,0xFB ,0x00 );
+  delay(250);
+}
+
+void ACC_getADC() {
+  TWBR = ((F_CPU / I2C_SPEED) - 16) / 2; // change the I2C clock rate. !! you must check if the nunchuk is ok with this freq
+  i2c_getSixRawADC(NUNCHACK_ADDRESS,0x00);
+
+  ACC_ORIENTATION(  ( (rawADC[3]<<2)        + ((rawADC[5]>>4)&0x2) ) ,
+                  - ( (rawADC[2]<<2)        + ((rawADC[5]>>3)&0x2) ) ,
+                    ( ((rawADC[4]&0xFE)<<2) + ((rawADC[5]>>5)&0x6) ));
+  ACC_Common();
+}
+#endif
+
+// ************************************************************************
+// LIS3LV02 I2C Accelerometer
+// ************************************************************************
+#if defined(LIS3LV02)
+#define LIS3A  0x1D
+
+void ACC_init(){
+  i2c_writeReg(LIS3A ,0x20 ,0xD7 ); // CTRL_REG1   1101 0111 Pwr on, 160Hz 
+  i2c_writeReg(LIS3A ,0x21 ,0x50 ); // CTRL_REG2   0100 0000 Littl endian, 12 Bit, Boot
+}
+
+void ACC_getADC(){
+  TWBR = ((F_CPU / 400000L) - 16) / 2; // change the I2C clock rate to 400kHz
+  i2c_getSixRawADC(LIS3A,0x28+0x80);
+  ACC_ORIENTATION( ((rawADC[1]<<8) | rawADC[0])>>2 ,
+                   ((rawADC[3]<<8) | rawADC[2])>>2 ,
+                   ((rawADC[5]<<8) | rawADC[4])>>2);
+  ACC_Common();
+}
+#endif
+
+// ************************************************************************************************************
+// I2C Accelerometer LSM303DLx
+// ************************************************************************************************************
+#if defined(LSM303DLx_ACC)
+void ACC_init () {
+  delay(10);
+  i2c_writeReg(0x18,0x20,0x27);
+  i2c_writeReg(0x18,0x23,0x30);
+  i2c_writeReg(0x18,0x21,0x00);
+}
+
+  void ACC_getADC () {
+  TWBR = ((F_CPU / 400000L) - 16) / 2;
+  i2c_getSixRawADC(0x18,0xA8);
+
+  ACC_ORIENTATION( ((rawADC[1]<<8) | rawADC[0])>>4 ,
+                   ((rawADC[3]<<8) | rawADC[2])>>4 ,
+                   ((rawADC[5]<<8) | rawADC[4])>>4 );
+  ACC_Common();
+}
+#endif
 
 // ************************************************************************************************************
 // ADC ACC
@@ -612,6 +1053,40 @@ void Gyro_getADC () {
   GYRO_ORIENTATION( ((rawADC[1]<<8) | rawADC[0])>>2  ,
                     ((rawADC[3]<<8) | rawADC[2])>>2  ,
                     ((rawADC[5]<<8) | rawADC[4])>>2  );
+  GYRO_Common();
+}
+#endif
+
+// ************************************************************************************************************
+// I2C Gyroscope ITG3200 
+// ************************************************************************************************************
+// I2C adress: 0xD2 (8bit)   0x69 (7bit)
+// I2C adress: 0xD0 (8bit)   0x68 (7bit)
+// principle:
+// 1) VIO is connected to VDD
+// 2) I2C adress is set to 0x69 (AD0 PIN connected to VDD)
+// or 2) I2C adress is set to 0x68 (AD0 PIN connected to GND)
+// 3) sample rate = 1000Hz ( 1kHz/(div+1) )
+// ************************************************************************************************************
+#if defined(ITG3200)
+void Gyro_init() {
+  delay(100);
+  i2c_writeReg(ITG3200_ADDRESS, 0x3E, 0x80); //register: Power Management  --  value: reset device
+//  delay(5);
+//  i2c_writeReg(ITG3200_ADDRESS, 0x15, ITG3200_SMPLRT_DIV); //register: Sample Rate Divider  -- default value = 0: OK
+  delay(5);
+  i2c_writeReg(ITG3200_ADDRESS, 0x16, 0x18 + ITG3200_DLPF_CFG); //register: DLPF_CFG - low pass filter configuration
+  delay(5);
+  i2c_writeReg(ITG3200_ADDRESS, 0x3E, 0x03); //register: Power Management  --  value: PLL with Z Gyro reference
+  delay(100);
+}
+
+void Gyro_getADC () {
+  TWBR = ((F_CPU / 400000L) - 16) / 2; // change the I2C clock rate to 400kHz
+  i2c_getSixRawADC(ITG3200_ADDRESS,0X1D);
+  GYRO_ORIENTATION( ((rawADC[0]<<8) | rawADC[1])>>2 , // range: +/- 8192; +/- 2000 deg/sec
+                    ((rawADC[2]<<8) | rawADC[3])>>2 ,
+                    ((rawADC[4]<<8) | rawADC[5])>>2 );
   GYRO_Common();
 }
 #endif
@@ -680,7 +1155,35 @@ uint8_t Mag_getADC() { // return 1 when news values are available, 0 otherwise
 }
 #endif
 
-
+// ************************************************************************************************************
+// I2C Compass MAG3110
+// ************************************************************************************************************
+// I2C adress: 0x0E (7bit)
+// ************************************************************************************************************
+#if defined(MAG3110)
+  #define MAG_ADDRESS 0x0E
+  #define MAG_DATA_REGISTER 0x01
+  #define MAG_CTRL_REG1 0x10
+  #define MAG_CTRL_REG2 0x11
+  
+  void Mag_init() {
+    delay(100);
+    i2c_writeReg(MAG_ADDRESS,MAG_CTRL_REG2,0x80);  //Automatic Magnetic Sensor Reset
+    delay(100);
+    i2c_writeReg(MAG_ADDRESS,MAG_CTRL_REG1,0x11); // DR = 20Hz ; OS ratio = 64 ; mode = Active
+    delay(100);
+    magInit = 1;
+  }
+  
+  #if !defined(MPU6050_I2C_AUX_MASTER)
+    void Device_Mag_getADC() {
+      i2c_getSixRawADC(MAG_ADDRESS,MAG_DATA_REGISTER);
+      MAG_ORIENTATION( ((rawADC[0]<<8) | rawADC[1]) ,          
+                       ((rawADC[2]<<8) | rawADC[3]) ,     
+                       ((rawADC[4]<<8) | rawADC[5]) );
+    }
+  #endif
+#endif
 // ************************************************************************************************************
 // I2C Compass HMC5883
 // ************************************************************************************************************
@@ -773,6 +1276,92 @@ void Mag_init() {
 } //  Mag_init().
 #endif
 
+// ************************************************************************************************************
+// I2C Compass HMC5843
+// ************************************************************************************************************
+// I2C adress: 0x3C (8bit)   0x1E (7bit)
+// ************************************************************************************************************
+#if defined(HMC5843)
+
+  #define MAG_ADDRESS 0x1E
+  #define MAG_DATA_REGISTER 0x03
+  
+  void Mag_init() { 
+    delay(100);
+    // force positiveBias
+    i2c_writeReg(MAG_ADDRESS ,0x00 ,0x71 ); //Configuration Register A  -- 0 11 100 01  num samples: 8 ; output rate: 15Hz ; positive bias
+    delay(50);
+    // set gains for calibration
+    i2c_writeReg(MAG_ADDRESS ,0x01 ,0x60 ); //Configuration Register B  -- 011 00000    configuration gain 2.5Ga
+    i2c_writeReg(MAG_ADDRESS ,0x02 ,0x01 ); //Mode register             -- 000000 01    single Conversion Mode
+
+    // read values from the compass -  self test operation
+    // by placing the mode register into single-measurement mode (0x01), two data acquisition cycles will be made on each magnetic vector.
+    // The first acquisition values will be subtracted from the second acquisition, and the net measurement will be placed into the data output registers
+    delay(100);
+      getADC();
+    delay(10);
+      magGain[ROLL]  =  1000.0 / abs(imu.magADC[ROLL]);
+      magGain[PITCH] =  1000.0 / abs(imu.magADC[PITCH]);
+      magGain[YAW]   =  1000.0 / abs(imu.magADC[YAW]);
+
+    // leave test mode
+    i2c_writeReg(MAG_ADDRESS ,0x00 ,0x70 ); //Configuration Register A  -- 0 11 100 00  num samples: 8 ; output rate: 15Hz ; normal measurement mode
+    i2c_writeReg(MAG_ADDRESS ,0x01 ,0x20 ); //Configuration Register B  -- 001 00000    configuration gain 1.3Ga
+    i2c_writeReg(MAG_ADDRESS ,0x02 ,0x00 ); //Mode register             -- 000000 00    continuous Conversion Mode
+
+    magInit = 1;
+  }
+#endif
+  
+#if defined(HMC5843) || defined(HMC5883)
+void getADC() {
+  i2c_getSixRawADC(MAG_ADDRESS,MAG_DATA_REGISTER);
+  #if defined(HMC5843)
+    MAG_ORIENTATION( ((rawADC[0]<<8) | rawADC[1]) ,
+                     ((rawADC[2]<<8) | rawADC[3]) ,
+                     ((rawADC[4]<<8) | rawADC[5]) );
+  #endif
+  #if defined (HMC5883)  
+    MAG_ORIENTATION( ((rawADC[0]<<8) | rawADC[1]) ,
+                     ((rawADC[4]<<8) | rawADC[5]) ,
+                     ((rawADC[2]<<8) | rawADC[3]) );
+  #endif
+}
+
+#if !defined(MPU6050_I2C_AUX_MASTER)
+void Device_Mag_getADC() {
+  getADC();
+}
+#endif
+
+#endif
+
+// ************************************************************************************************************
+// I2C Compass AK8975
+// ************************************************************************************************************
+// I2C adress: 0x0C (7bit)
+// ************************************************************************************************************
+#if defined(AK8975)
+  #define MAG_ADDRESS 0x0C
+  #define MAG_DATA_REGISTER 0x03
+  
+  void Mag_init() {
+    delay(100);
+    i2c_writeReg(MAG_ADDRESS,0x0a,0x01);  //Start the first conversion
+    delay(100);
+    magInit = 1;
+  }
+
+  void Device_Mag_getADC() {
+    i2c_getSixRawADC(MAG_ADDRESS,MAG_DATA_REGISTER);
+    MAG_ORIENTATION( ((rawADC[1]<<8) | rawADC[0]) ,          
+                     ((rawADC[3]<<8) | rawADC[2]) ,     
+                     ((rawADC[5]<<8) | rawADC[4]) );
+    //Start another meassurement
+    i2c_writeReg(MAG_ADDRESS,0x0a,0x01);
+  }
+#endif
 
 // ************************************************************************************************************
 // I2C Gyroscope and Accelerometer MPU6050
@@ -848,7 +1437,168 @@ void ACC_getADC () {
   #endif
 #endif
 
+// ************************************************************************************************************
+// Start Of I2C Gyroscope and Accelerometer LSM330
+// ************************************************************************************************************
+#if defined(LSM330)
+////////////////////////////////////	
+//           ACC start            //
+////////////////////////////////////
+void ACC_init () {
 
+  delay(10);
+  //i2c_writeReg(LSM330_ACC_ADDRESS ,0x20 ,0x17 ); // 1Hz
+  //i2c_writeReg(LSM330_ACC_ADDRESS ,0x20 ,0x27 ); // 10Hz
+  i2c_writeReg(LSM330_ACC_ADDRESS ,0x20 ,0x37 );  // 25Hz
+  //i2c_writeReg(LSM330_ACC_ADDRESS ,0x20 ,0x47 ); // 50Hz
+  //i2c_writeReg(LSM330_ACC_ADDRESS ,0x20 ,0x57 ); // 100Hz
+  
+  delay(5);
+  //i2c_writeReg(LSM330_ACC_ADDRESS ,0x23 ,0x08 ); // 2G
+  //i2c_writeReg(LSM330_ACC_ADDRESS ,0x23 ,0x18 ); // 4G
+  i2c_writeReg(LSM330_ACC_ADDRESS ,0x23 ,0x28 ); // 8G
+  //i2c_writeReg(LSM330_ACC_ADDRESS ,0x23 ,0x38 ); // 16G 
+  
+  delay(5);
+  i2c_writeReg(LSM330_ACC_ADDRESS,0x21,0x00);// no high-pass filter
+}
+
+//#define ACC_DELIMITER 5 // for 2g
+#define ACC_DELIMITER 4 // for 4g
+//#define ACC_DELIMITER 3 // for 8g
+//#define ACC_DELIMITER 2 // for 16g
+
+  void ACC_getADC () {
+  TWBR = ((F_CPU / 400000L) - 16) / 2;// change the I2C clock rate to 400kHz
+  i2c_getSixRawADC(LSM330_ACC_ADDRESS,0x80|0x28);// Start multiple read at reg 0x28
+
+  ACC_ORIENTATION( ((rawADC[1]<<8) | rawADC[0])>>ACC_DELIMITER ,
+                   ((rawADC[3]<<8) | rawADC[2])>>ACC_DELIMITER ,
+                   ((rawADC[5]<<8) | rawADC[4])>>ACC_DELIMITER );
+  ACC_Common();
+}
+////////////////////////////////////
+//            ACC end             //
+////////////////////////////////////	
+	
+////////////////////////////////////	
+//           Gyro start           //
+////////////////////////////////////
+void Gyro_init() {
+  delay(100);
+  i2c_writeReg(LSM330_GYRO_ADDRESS ,0x20 ,0x8F ); // CTRL_REG1   400Hz ODR, 20hz filter, run!
+  delay(5);
+  i2c_writeReg(LSM330_GYRO_ADDRESS ,0x24 ,0x02 ); // CTRL_REG5   low pass filter enable
+  delay(5);
+  i2c_writeReg(LSM330_GYRO_ADDRESS ,0x23 ,0x30); // CTRL_REG4 Select 2000dps
+}
+
+void Gyro_getADC () {
+  TWBR = ((F_CPU / 400000L) - 16) / 2; // change the I2C clock rate to 400kHz
+  i2c_getSixRawADC(LSM330_GYRO_ADDRESS,0x80|0x28);
+
+  GYRO_ORIENTATION( ((rawADC[1]<<8) | rawADC[0])>>2  ,
+                    ((rawADC[3]<<8) | rawADC[2])>>2  ,
+                    ((rawADC[5]<<8) | rawADC[4])>>2  );
+  GYRO_Common();
+}
+////////////////////////////////////
+//            Gyro end            //
+////////////////////////////////////
+
+#endif /* LSM330 */
+
+// ************************************************************************************************************
+// End Of I2C Gyroscope and Accelerometer LSM330
+// ************************************************************************************************************
+
+// ************************************************************************************************************
+// I2C Gyroscope MPU3050
+// ************************************************************************************************************
+#if defined(MPU3050)
+
+void Gyro_init() {
+  TWBR = ((F_CPU / 400000L) - 16) / 2; // change the I2C clock rate to 400kHz
+  i2c_writeReg(MPU3050_ADDRESS, 0x3E, 0x80);             //PWR_MGMT_1    -- DEVICE_RESET 1
+  delay(5);
+  i2c_writeReg(MPU3050_ADDRESS, 0x3E, 0x03);             //PWR_MGMT_1    -- SLEEP 0; CYCLE 0; TEMP_DIS 0; CLKSEL 3 (PLL with Z Gyro reference)
+  i2c_writeReg(MPU3050_ADDRESS, 0x16, MPU3050_DLPF_CFG + 0x18); // Gyro CONFIG   -- EXT_SYNC_SET 0 (disable input pin for data sync) ; default DLPF_CFG = 0 => GYRO bandwidth = 256Hz); -- FS_SEL = 3: Full scale set to 2000 deg/sec
+}
+
+void Gyro_getADC () {
+  i2c_getSixRawADC(MPU3050_ADDRESS, 0x1D);
+  GYRO_ORIENTATION( ((rawADC[0]<<8) | rawADC[1])>>2 , // range: +/- 8192; +/- 2000 deg/sec
+                    ((rawADC[2]<<8) | rawADC[3])>>2 ,
+                    ((rawADC[4]<<8) | rawADC[5])>>2 );
+  GYRO_Common();
+}
+
+#endif
+
+
+#if defined(WMP) || defined(NUNCHUCK)
+// ************************************************************************************************************
+// I2C Wii Motion Plus + optional Nunchuk
+// ************************************************************************************************************
+// I2C adress 1: 0x53 (7bit)
+// I2C adress 2: 0x52 (7bit)
+// ************************************************************************************************************
+#define WMP_ADDRESS_1 0x53
+#define WMP_ADDRESS_2 0x52
+
+void Gyro_init() {
+  delay(250);
+  i2c_writeReg(WMP_ADDRESS_1, 0xF0, 0x55); // Initialize Extension
+  delay(250);
+  i2c_writeReg(WMP_ADDRESS_1, 0xFE, 0x05); // Activate Nunchuck pass-through mode
+  delay(250);
+}
+
+void Gyro_getADC() {
+  uint8_t axis;
+  TWBR = ((F_CPU / I2C_SPEED) - 16) / 2; // change the I2C clock rate
+  i2c_getSixRawADC(WMP_ADDRESS_2,0x00);
+
+  if (micros() < (neutralizeTime + NEUTRALIZE_DELAY)) {//we neutralize data in case of blocking+hard reset state
+    for (axis = 0; axis < 3; axis++) {imu.gyroADC[axis]=0;imu.accADC[axis]=0;}
+    imu.accADC[YAW] = ACC_1G;
+    f.NUNCHUKDATA = 0;
+  } 
+
+  // Wii Motion Plus Data
+  if ( (rawADC[5]&0x03) == 0x02 ) {
+    // Assemble 14bit data 
+    imu.gyroADC[ROLL]  = - ( ((rawADC[5]>>2)<<8) | rawADC[2] ); //range: +/- 8192
+    imu.gyroADC[PITCH] = - ( ((rawADC[4]>>2)<<8) | rawADC[1] );
+    imu.gyroADC[YAW]  =  - ( ((rawADC[3]>>2)<<8) | rawADC[0] );
+    GYRO_Common();
+    // Check if slow bit is set and normalize to fast mode range
+    imu.gyroADC[ROLL]  = (rawADC[3]&0x01)     ? imu.gyroADC[ROLL]/5  : imu.gyroADC[ROLL];  //the ratio 1/5 is not exactly the IDG600 or ISZ650 specification 
+    imu.gyroADC[PITCH] = (rawADC[4]&0x02)>>1  ? imu.gyroADC[PITCH]/5 : imu.gyroADC[PITCH]; //we detect here the slow of fast mode WMP gyros values (see wiibrew for more details)
+    imu.gyroADC[YAW]   = (rawADC[3]&0x02)>>1  ? imu.gyroADC[YAW]/5   : imu.gyroADC[YAW];   // this step must be done after zero compensation    
+    f.NUNCHUKDATA = 0;
+  #if defined(NUNCHUCK)
+    } else if ( (rawADC[5]&0x03) == 0x00 ) { // Nunchuk Data
+      ACC_ORIENTATION(  ( (rawADC[3]<<2)      | ((rawADC[5]>>4)&0x02) ) ,
+                      - ( (rawADC[2]<<2)      | ((rawADC[5]>>3)&0x02) ) ,
+                        ( ((rawADC[4]>>1)<<3) | ((rawADC[5]>>5)&0x06) ) );
+      ACC_Common();
+      f.NUNCHUKDATA = 1;
+  #endif
+  }
+}
+
+#if defined(NUNCHUCK)
+  void ACC_init () {
+    // We need to set ACC_1G for the Nunchuk beforehand -> moved in def.h
+    // If a different accelerometer is used, it will be overwritten by its ACC_init() later.
+  }
+  void ACC_getADC () { // it's done ine the WMP gyro part
+    Gyro_getADC();
+  }
+#endif
+
+#endif
 
 // ************************************************************************************************************
 // I2C Sonar SRF08

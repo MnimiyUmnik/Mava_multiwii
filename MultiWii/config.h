@@ -32,17 +32,35 @@
 /*************************************************************************************************/
 
   /**************************    The type of multicopter    ****************************/
- 
+    //#define GIMBAL
+    //#define BI
+    //#define TRI
+    //#define QUADP
+    //#define QUADX
+    //#define Y4
+    //#define Y6
+    //#define HEX6
+    //#define HEX6X
+    //#define HEX6H  // New Model
+    //#define OCTOX8
+    //#define OCTOFLATP
+    //#define OCTOFLATX
+    //#define FLYING_WING
+    //#define VTAIL4
     #define AIRPLANE
-   
+    //#define SINGLECOPTER
+    //#define DUALCOPTER
+    //#define HELI_120_CCPM
+    //#define HELI_90_DEG
+
   /****************************    Motor minthrottle    *******************************/
     /* Set the minimum throttle command sent to the ESC (Electronic Speed Controller)
        This is the minimum value that allow motors to run at a idle speed  */
     //#define MINTHROTTLE 1300 // for Turnigy Plush ESCs 10A
     //#define MINTHROTTLE 1120 // for Super Simple ESCs 10A
     //#define MINTHROTTLE 1064 // special ESC (simonk)
-    //#define MINTHROTTLE 1050 // for brushed ESCs like ladybird
-    #define MINTHROTTLE 1150 // (*) (**)
+    #define MINTHROTTLE 990 // for brushed ESCs like ladybird
+    //#define MINTHROTTLE 1150 // (*) (**)
 
   /****************************    Motor maxthrottle    *******************************/
     /* this is the maximum value for the ESCs at full power, this value can be increased up to 2000 */
@@ -51,7 +69,7 @@
   /****************************    Mincommand          *******************************/
     /* this is the value for the ESCs when they are not armed
        in some cases, this value must be lowered down to 900 for some specific ESCs, otherwise they failed to initiate */
-    #define MINCOMMAND  1000
+    #define MINCOMMAND  900
 
   /**********************************    I2C speed   ************************************/
     #define I2C_SPEED 100000L     //100kHz normal mode, this value must be used for a genuine WMP
@@ -68,32 +86,118 @@
     /***************************    Combined IMU Boards    ********************************/
       /* if you use a specific sensor board:
          please submit any correction to this list.
-        
+           Note from Alex: I only own some boards, for other boards, I'm not sure, the info was gathered via rc forums, be cautious */
+      //#define FFIMUv1         // first 9DOF+baro board from Jussi, with HMC5843                   <- confirmed by Alex
+      //#define FFIMUv2         // second version of 9DOF+baro board from Jussi, with HMC5883       <- confirmed by Alex
+      //#define FREEIMUv1       // v0.1 & v0.2 & v0.3 version of 9DOF board from Fabio
+      //#define FREEIMUv03      // FreeIMU v0.3 and v0.3.1
+      //#define FREEIMUv035     // FreeIMU v0.3.5 no baro
+      //#define FREEIMUv035_MS  // FreeIMU v0.3.5_MS                                                <- confirmed by Alex
+      //#define FREEIMUv035_BMP // FreeIMU v0.3.5_BMP
+      //#define FREEIMUv04      // FreeIMU v0.4 with MPU6050, HMC5883L, MS561101BA                  <- confirmed by Alex
+      //#define FREEIMUv043     // same as FREEIMUv04 with final MPU6050 (with the right ACC scale)
+      //#define NANOWII         // the smallest multiwii FC based on MPU6050 + pro micro based proc <- confirmed by Alex
+      //#define PIPO            // 9DOF board from erazz
+      //#define QUADRINO        // full FC board 9DOF+baro board from witespy  with BMP085 baro     <- confirmed by Alex
+      //#define QUADRINO_ZOOM   // full FC board 9DOF+baro board from witespy  second edition
+      //#define QUADRINO_ZOOM_MS// full FC board 9DOF+baro board from witespy  second edition       <- confirmed by Alex
+      //#define ALLINONE        // full FC board or standalone 9DOF+baro board from CSG_EU
+      //#define AEROQUADSHIELDv2
+      //#define ATAVRSBIN1      // Atmel 9DOF (Contribution by EOSBandi). requires 3.3V power.
+      //#define SIRIUS          // Sirius Navigator IMU                                             <- confirmed by Alex
+      //#define SIRIUSGPS       // Sirius Navigator IMU  using external MAG on GPS board            <- confirmed by Alex
+      //#define SIRIUS600       // Sirius Navigator IMU  using the WMP for the gyro
+      //#define SIRIUS_AIR      // Sirius Navigator IMU 6050 32U4 from MultiWiiCopter.com           <- confirmed by Alex
+      //#define SIRIUS_AIR_GPS  // Sirius Navigator IMU 6050 32U4 from MultiWiiCopter.com with GPS/MAG remote located
+      //#define SIRIUS_MEGAv5_OSD //  Paris_Sirius™ ITG3050,BMA280,MS5611,HMC5883,uBlox  http://www.Multiwiicopter.com <- confirmed by Alex
+      //#define MINIWII         // Jussi's MiniWii Flight Controller                                <- confirmed by Alex
+      //#define MICROWII        // MicroWii 10DOF with ATmega32u4, MPU6050, HMC5883L, MS561101BA from http://flyduino.net/
+      //#define CITRUSv2_1      // CITRUS from qcrc.ca
+      //#define CHERRY6DOFv1_0
+      //#define DROTEK_10DOF    // Drotek 10DOF with ITG3200, BMA180, HMC5883, BMP085, w or w/o LLC
+      //#define DROTEK_10DOF_MS // Drotek 10DOF with ITG3200, BMA180, HMC5883, MS5611, LLC
+      //#define DROTEK_6DOFv2   // Drotek 6DOF v2
+      //#define DROTEK_6DOF_MPU // Drotek 6DOF with MPU6050
+      //#define DROTEK_10DOF_MPU//
+      //#define MONGOOSE1_0     // mongoose 1.0    http://store.ckdevices.com/
+      //#define CRIUS_LITE      // Crius MultiWii Lite
+      //#define CRIUS_SE        // Crius MultiWii SE
+      //#define CRIUS_SE_v2_0   // Crius MultiWii SE 2.0 with MPU6050, HMC5883 and BMP085
+      //#define OPENLRSv2MULTI  // OpenLRS v2 Multi Rc Receiver board including ITG3205 and ADXL345
+      //#define BOARD_PROTO_1   // with MPU6050 + HMC5883L + MS baro
+      //#define BOARD_PROTO_2   // with MPU6050 + slave  MAG3110 + MS baro
+      //#define GY_80           // Chinese 10 DOF with  L3G4200D ADXL345 HMC5883L BMP085, LLC
+      //#define GY_85           // Chinese 9 DOF with  ITG3205 ADXL345 HMC5883L LLC
+      //#define GY_86           // Chinese 10 DOF with  MPU6050 HMC5883L MS5611, LLC
+      //#define GY_521          // Chinese 6  DOF with  MPU6050, LLC
+      //#define INNOVWORKS_10DOF // with ITG3200, BMA180, HMC5883, BMP085 available here http://www.diymulticopter.com
+      //#define INNOVWORKS_6DOF // with ITG3200, BMA180 available here http://www.diymulticopter.com
+      //#define MultiWiiMega    // MEGA + MPU6050+HMC5883L+MS5611 available here http://www.diymulticopter.com
+      //#define PROTO_DIY       // 10DOF mega board
+      //#define IOI_MINI_MULTIWII// www.bambucopter.com
+      //#define Bobs_6DOF_V1     // BobsQuads 6DOF V1 with ITG3200 & BMA180
+      //#define Bobs_9DOF_V1     // BobsQuads 9DOF V1 with ITG3200, BMA180 & HMC5883L
+      //#define Bobs_10DOF_BMP_V1 // BobsQuads 10DOF V1 with ITG3200, BMA180, HMC5883L & BMP180 - BMP180 is software compatible with BMP085
+      //#define FLYDUINO_MPU       // MPU6050 Break Out onboard 3.3V reg
+      //#define CRIUS_AIO_PRO_V1
+      //#define DESQUARED6DOFV2GO  // DEsquared V2 with ITG3200 only
+      //#define DESQUARED6DOFV4    // DEsquared V4 with MPU6050
+      //#define LADYBIRD
+      //#define MEGAWAP_V2_STD     // available here: http://www.multircshop.com                    <- confirmed by Alex
+      //#define MEGAWAP_V2_ADV
+      //#define HK_MultiWii_SE_V2  // Hobbyking board with MPU6050 + HMC5883L + BMP085
+      //#define HK_MultiWii_328P   // Also labeled "Hobbybro" on the back.  ITG3205 + BMA180 + BMP085 + NMC5583L + DSM2 Connector (Spektrum Satellite)  
+      //#define RCNet_FC           // RCNet FC with MPU6050 and MS561101BA  http://www.rcnet.com
+      //#define RCNet_FC_GPS       // RCNet FC with MPU6050 + MS561101BA + HMC5883L + UBLOX GPS http://www.rcnet.com
+      //#define FLYDU_ULTRA        // MEGA+10DOF+MT3339 FC
+      //#define DIYFLYING_MAGE_V1  // diyflying 10DOF mega board with MPU6050 + HMC5883L + BMP085 http://www.indoor-flying.hk
+      //#define MultiWii_32U4_SE         // Hextronik MultiWii_32U4_SE
+      //#define MultiWii_32U4_SE_no_baro // Hextronik MultiWii_32U4_SE without the MS561101BA for more free flash-memory
+      //#define Flyduino9DOF       // Flyduino 9DOF IMU MPU6050+HMC5883l
+      //#define Nano_Plane         // Multiwii Plane version with tail-front LSM330 sensor http://www.radiosait.ru/en/page_5324.html
       
     /***************************    independent sensors    ********************************/
       /* leave it commented if you already checked a specific board above */
       /* I2C gyroscope */
-   
+      //#define WMP
+      //#define ITG3200
+      //#define MPU3050
       #define L3G4200D
       //#define MPU6050       //combo + ACC
-     
+      //#define LSM330        //combo + ACC
+      
       /* I2C accelerometer */
-    
+      //#define NUNCHUCK  // if you want to use the nunckuk connected to a WMP
+      //#define MMA7455
       #define ADXL345
-     
+      //#define BMA020
+      //#define BMA180
+      //#define BMA280
+      //#define NUNCHACK  // if you want to use the nunckuk as a standalone I2C ACC without WMP
+      //#define LIS3LV02
+      //#define LSM303DLx_ACC
+      //#define MMA8451Q
+
       /* I2C barometer */
       #define BMP085
-     
+      //#define MS561101BA
 
       /* I2C magnetometer */
-    
+      //#define HMC5843
       #define HMC5883
-     
+      //#define AK8975
+      //#define MAG3110
+
       /* Sonar */ // for visualization purpose currently - no control code behind
       #define SRF02 // use the Devantech SRF i2c sensors
-      
+      //#define SRF08
+      //#define SRF10
+      //#define SRF23
 
-       /* enforce your individual sensor orientation - even overrides board specific defaults */
+      /* ADC accelerometer */ // for 5DOF from sparkfun, uses analog PIN A1/A2/A3
+      //#define ADCACC
+
+      /* enforce your individual sensor orientation - even overrides board specific defaults */
       //#define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  Y; imu.accADC[PITCH]  = -X; imu.accADC[YAW]  = Z;}
       //#define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] = -Y; imu.gyroADC[PITCH] =  X; imu.gyroADC[YAW] = Z;}
       //#define FORCE_MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  X; imu.magADC[PITCH]  =  Y; imu.magADC[YAW]  = Z;}
@@ -145,12 +249,12 @@
 
   /***********************          Cam Stabilisation             ***********************/
     /* The following lines apply only for a pitch/roll tilt stabilization system. Uncomment the first or second line to activate it */
-    //#define SERVO_MIX_TILT
+   // #define SERVO_MIX_TILT
     //#define SERVO_TILT
 
     /* camera trigger function : activated via Rc Options in the GUI, servo output=A2 on promini */
     // trigger interval can be changed via (*GUI*) or via AUX channel
-    //#define CAMTRIG
+    #define CAMTRIG
     #define CAM_TIME_HIGH 1000   // the duration of HIGH state servo expressed in ms
 
   /***********************          Airplane                       ***********************/
@@ -175,7 +279,26 @@
 
     //#define VOLTAGEDROP_COMPENSATION // voltage impact correction
 
-  
+  /***********************          Heli                           ***********************/
+    /* Channel to control CollectivePitch */
+    #define COLLECTIVE_PITCH      THROTTLE
+
+    /* Limit the range of Collective Pitch. 100% is Full Range each way and position for Zero Pitch */
+    #define COLLECTIVE_RANGE { 80, 0, 80 }// {Min%, ZeroPitch offset from 1500, Max%}.
+    #define YAWMOTOR                 0       // If a motor is used as YAW Set to 1 else set to 0.
+
+    /* Servo mixing for heli 120
+                         {Coll,Nick,Roll} */
+    #define SERVO_NICK   { +10, -10,  0 }
+    #define SERVO_LEFT   { +10, +5, +10 } 
+    #define SERVO_RIGHT  { +10, +5, -10 } 
+
+    /* Limit Maximum controll for Roll & Nick  in 0-100% */
+    #define CONTROL_RANGE   { 100, 100 }      //  { ROLL,PITCH }
+
+    /* use servo code to drive the throttle output. You want this for analog servo driving the throttle on IC engines.
+       if inactive, throttle output will be treated as a motor output, so it can drive an ESC */
+    //#define HELI_USE_SERVO_FOR_THROTTLE
 
   /***********************      your individual mixing     ***********************/
     /* if you want to override an existing entry in the mixing table, you may want to avoid editing the
@@ -241,7 +364,7 @@
          You have to invert the S-Bus-Serial Signal e.g. with a Hex-Inverter like IC SN74 LS 04 */
       //#define SBUS
       //#define SBUS_SERIAL_PORT 1
-     // #define SBUS_MID_OFFSET 988 //SBUS Mid-Point at 1500
+      #define SBUS_MID_OFFSET 988 //SBUS Mid-Point at 1500
 
 /*************************************************************************************************/
 /*****************                                                                 ***************/
@@ -293,7 +416,7 @@
          Motor 1-4 = 10-bit hardware PWM
          Motor 5-8 = 10-bit Software PWM
          Servos    = 10-bit Software PWM */
-      //#define HWPWM6
+     #define HWPWM6
 
     /**********************************    Aux 2 Pin     **********************************/
       /* AUX2 pin on pin RXO */
@@ -338,10 +461,10 @@
 
   /******                Serial com speed    *********************************/
     /* This is the speed of the serial interfaces */
-    #define SERIAL0_COM_SPEED 115200
-    #define SERIAL1_COM_SPEED 115200
-    #define SERIAL2_COM_SPEED 115200
-    #define SERIAL3_COM_SPEED 115200
+    #define SERIAL0_COM_SPEED 57600
+    #define SERIAL1_COM_SPEED 57600
+    #define SERIAL2_COM_SPEED 57600
+    #define SERIAL3_COM_SPEED 57600
 
     /* interleaving delay in micro seconds between 2 readings WMP/NK in a WMP+NK config
        if the ACC calibration time is very long (20 or 30s), try to increase this delay up to 4000
@@ -524,7 +647,7 @@
        With UBLOX and MTK_BINARY you don't have to use GPS_FILTERING in multiwii code !!! */
 
     
-    //#define NMEA
+    #define NMEA
     //#define UBLOX
     //#define MTK_BINARY16
     //#define MTK_BINARY19
@@ -535,7 +658,7 @@
        including some navigation functions
        contribution from EOSBandi   http://code.google.com/p/i2c-gps-nav/ 
        You have to use at least I2CGpsNav code r33 */
-    //#define I2C_GPS
+    #define I2C_GPS
     // If your I2C GPS board has Sonar support enabled
     //#define I2C_GPS_SONAR
 
@@ -563,7 +686,7 @@
        Convert the degree+minutes into decimal degree by ==> degree+minutes*(1/60)
        Note the sign on declination it could be negative or positive (WEST or EAST) */
     //#define MAG_DECLINATION  3.96f              //For Budapest Hungary.
-    #define MAG_DECLINATION  0.0f   //(**)
+    #define MAG_DECLINATION  4.52f   //(**)
 
     #define GPS_LEAD_FILTER                      // Adds a forward predictive filterig to compensate gps lag. Code based on Jason Short's lead filter implementation
     
@@ -576,13 +699,92 @@
   /***********************        LCD/OLED - display settings       *********************/
   /**************************************************************************************/
 
-  
+    /* http://www.multiwii.com/wiki/index.php?title=Extra_features#LCD_.2F_OLED */
+
+    /*****************************   The type of LCD     **********************************/
+      /* choice of LCD attached for configuration and telemetry, see notes below */
+      //#define LCD_DUMMY       // No Physical LCD attached.  With this & LCD_CONF defined, TX sticks still work to set gains, by watching LED blink.  
+      //#define LCD_SERIAL3W    // Alex' initial variant with 3 wires, using rx-pin for transmission @9600 baud fixed
+      //#define LCD_TEXTSTAR    // SERIAL LCD: Cat's Whisker LCD_TEXTSTAR Module CW-LCD-02 (Which has 4 input keys for selecting menus)
+      //#define LCD_VT100       // SERIAL LCD: vt100 compatible terminal emulation (blueterm, putty, etc.)
+      //#define LCD_TTY         // SERIAL LCD: useful to tweak parameters over cable with arduino IDE 'serial monitor'
+      //#define LCD_ETPP        // I2C LCD: Eagle Tree Power Panel LCD, which is i2c (not serial)
+      //#define LCD_LCD03       // I2C LCD: LCD03, which is i2c
+      //#define OLED_I2C_128x64 // I2C LCD: OLED http://www.multiwii.com/forum/viewtopic.php?f=7&t=1350
+      //#define OLED_DIGOLE     // I2C OLED from http://www.digole.com/index.php?productID=550
+
+    /******************************   Display settings   ***********************************/
+      #define LCD__PORT 0    // must be 0 on Pro Mini and single serial boards; Set to your choice on any Mega based board
+
+      //#define SUPPRESS_OLED_I2C_128x64LOGO  // suppress display of OLED logo to save memory
+
+    /* double font height for better readability. Reduces visible #lines by half.
+     * The lower part of each page is accessible under the name of shifted keyboard letter :
+     * 1 - ! , 2 - @ , 3 - # , 4 - $ , 5 - % , 6 - ^ , 7 - & , 8 - * , 9 - (
+     * You must add both to your lcd.telemetry.* sequences
+     */
+      //#define DISPLAY_FONT_DSIZE //currently only aplicable for OLED_I2C_128x64 and OLED_DIGOLE
+
+    /* style of display - AUTODETECTED via LCD_ setting - only activate to override defaults */
+      //#define DISPLAY_2LINES
+      //#define DISPLAY_MULTILINE
+      //#define MULTILINE_PRE 2  // multiline configMenu # pref lines
+      //#define MULTILINE_POST 6 // multiline configMenu # post lines
+      //#define DISPLAY_COLUMNS 16
+    /********************************    Navigation     ***********************************/
+    /* keys to navigate the LCD menu */
+      #define LCD_MENU_PREV 'p'
+      #define LCD_MENU_NEXT 'n'
+      #define LCD_VALUE_UP 'u'
+      #define LCD_VALUE_DOWN 'd'
+
+      #define LCD_MENU_SAVE_EXIT 's'
+      #define LCD_MENU_ABORT 'x'
 
   /**************************************************************************************/
   /***********************      LCD configuration menu         **************************/
   /**************************************************************************************/
 
-  
+    /* uncomment this line if you plan to use a LCD or OLED for tweaking parameters
+     * http://www.multiwii.com/wiki/index.php?title=Extra_features#Configuration_Menu */
+      //#define LCD_CONF
+
+    /* to include setting the aux switches for AUX1 -> AUX4 via LCD */
+      //#define LCD_CONF_AUX
+
+    /* optional exclude some functionality - uncomment to suppress unwanted aux channel configuration options */
+      //#define SUPPRESS_LCD_CONF_AUX2
+      //#define SUPPRESS_LCD_CONF_AUX34
+
+  /**************************************************************************************/
+  /***********************      LCD       telemetry            **************************/
+  /**************************************************************************************/
+
+    /* to monitor system values (battery level, loop time etc. with LCD 
+     * http://www.multiwii.com/wiki/index.php?title=LCD_Telemetry */
+
+    /********************************    Activation     ***********************************/
+    //#define LCD_TELEMETRY
+
+    /* to enable automatic hopping between a choice of telemetry pages uncomment this. */
+    //#define LCD_TELEMETRY_AUTO "123452679" // pages 1 to 9 in ascending order
+    //#define LCD_TELEMETRY_AUTO  "212232425262729" // strong emphasis on page 2
+
+    /* manual stepping sequence; first page of the sequence gets loaded at startup to allow non-interactive display */
+    //#define LCD_TELEMETRY_STEP "0123456789" // should contain a 0 to allow switching off.
+
+    /* optional exclude some functionality - uncomment to suppress some unwanted telemetry pages */
+    //#define SUPPRESS_TELEMETRY_PAGE_1
+    //#define SUPPRESS_TELEMETRY_PAGE_2
+    //#define SUPPRESS_TELEMETRY_PAGE_3
+    //#define SUPPRESS_TELEMETRY_PAGE_4
+    //#define SUPPRESS_TELEMETRY_PAGE_5
+    //#define SUPPRESS_TELEMETRY_PAGE_6
+    //#define SUPPRESS_TELEMETRY_PAGE_7
+    //#define SUPPRESS_TELEMETRY_PAGE_8
+    //#define SUPPRESS_TELEMETRY_PAGE_9
+    //#define SUPPRESS_TELEMETRY_PAGE_R
+
   /********************************************************************/
   /****                             RSSI                           ****/
   /********************************************************************/
@@ -592,7 +794,7 @@
   /********************************************************************/
   /****                             Buzzer                         ****/
   /********************************************************************/
-    #define BUZZER
+    //#define BUZZER
     //#define RCOPTIONSBEEP         // uncomment this if you want the buzzer to beep at any rcOptions change on channel Aux1 to Aux4
     //#define ARMEDTIMEWARNING 330  // (*) Trigger an alarm after a certain time of being armed [s] to save you lipo (if your TX does not have a countdown)
     //#define PILOTLAMP             //Uncomment if you are using a X-Arcraft Pilot Lamp
@@ -605,7 +807,7 @@
        with R1=33k and R2=51k
        vbat = [0;1023]*16/VBATSCALE
        must be associated with #define BUZZER ! */
-    #define VBAT              // uncomment this line to activate the vbat code
+    //#define VBAT              // uncomment this line to activate the vbat code
     #define VBATSCALE       131 // (*) (**) change this value if readed Battery voltage is different than real voltage
     #define VBATNOMINAL     126 // 12,6V full battery nominal voltage - only used for lcd.telemetry
     #define VBATLEVEL_WARN1 107 // (*) (**) 10,7V
@@ -670,6 +872,24 @@
   /****           baord naming                                     ****/
   /********************************************************************/
 
+    /*
+     * this name is displayed together with the MultiWii version number
+     * upon powerup on the LCD.
+     * If you are without a DISPLAYD then You may enable LCD_TTY and
+     * use arduino IDE's serial monitor to view the info.
+     *
+     * You must preserve the format of this string!
+     * It must be 16 characters total,
+     * The last 4 characters will be overwritten with the version number.
+     */
+    #define BOARD_NAME "MultiWii   V-.--"
+    //                  123456789.123456
+
+  /*************      Support multiple configuration profiles in EEPROM     ************/
+    //#define MULTIPLE_CONFIGURATION_PROFILES
+
+  /*************      do no reset constants when change of flashed program is detected ***********/
+    #define NO_FLASH_CHECK
 
 /*************************************************************************************************/
 /*****************                                                                 ***************/
@@ -715,7 +935,7 @@
       SERVO7  = pin 7   (elevator for fixed wing)
       SERVO8  = pin 8   (motor for fixed wing)       */ 
 
-    //#define MEGA_HW_PWM_SERVOS
+   // #define MEGA_HW_PWM_SERVOS
  
     /* HW PWM Servo outputs for 32u4 NanoWii, MicroWii etc. - works with either the variable SERVO_RFR_RATE or
      * one of the 3 fixed servo.refresh.rates *
@@ -771,7 +991,7 @@
        set to 1, enable 'R' option to reset values, max current, max altitude
        set to 2, adds min/max cycleTimes
        set to 3, adds additional powerconsumption on a per motor basis (this uses the big array and is a memory hog, if POWERMETER <> PM_SOFT) */
-    //#define LOG_VALUES 1
+    //#define LOG_VALUES 2
 
     /* Permanent logging to eeprom - survives (most) upgrades and parameter resets.
      * used to track number of flights etc. over lifetime of controller board.
