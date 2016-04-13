@@ -1,7 +1,15 @@
-
+#include <FastSerial.h>
 #include "C:\Users\Valeriy\Documents\GitHub\Mava_multiwii\libraries\mavlink\common/mavlink.h"
 
+ int type = MAV_TYPE_QUADROTOR;   ///< This system is an airplane / fixed wing
 
+        // Define the system type, in this case an airplane
+        uint8_t system_type = MAV_TYPE_FIXED_WING;
+        uint8_t autopilot_type = MAV_AUTOPILOT_GENERIC;
+
+        uint8_t system_mode = MAV_MODE_PREFLIGHT; ///< Booting up
+        uint32_t custom_mode = 0;                 ///< Custom mode, can be defined by user/adopter
+        uint8_t system_state = MAV_STATE_STANDBY; ///< System ready for flight
 
 
 
@@ -17,7 +25,7 @@
 #include "Serial.h"
 #include "Protocol.h"
 #include "RX.h"
-
+boolean calibrate_me = true;
 /************************************** MultiWii Serial Protocol *******************************************************/
 // Multiwii Serial Protocol 0 
 #define MSP_VERSION              0
@@ -156,6 +164,12 @@ void serializeNames(PGM_P s) {
 }
 
 void serialCom() {
+  if (calibrate_me) {
+    calibrate_me = false;
+    calibratingA=512; 
+  }
+   mavlink_msg_heartbeat_send(MAVLINK_COMM_0, type, autopilot_type, system_mode, custom_mode, system_state);
+  
   uint8_t c,n;  
   static uint8_t offset[UART_NUMBER];
   static uint8_t dataSize[UART_NUMBER];
@@ -632,15 +646,7 @@ void evaluateOtherData(uint8_t sr) {
 //        // comm lost mode if timer times out
 //        int sysid = 44;                   ///< ID 20 for this airplane
 //        int compid = MAV_COMP_ID_IMU;     ///< The component sending the message is the IMU, it could be also a Linux process
-//        int type = MAV_TYPE_QUADROTOR;   ///< This system is an airplane / fixed wing
-//
-//        // Define the system type, in this case an airplane
-//        uint8_t system_type = MAV_TYPE_FIXED_WING;
-//        uint8_t autopilot_type = MAV_AUTOPILOT_GENERIC;
-//
-//        uint8_t system_mode = MAV_MODE_PREFLIGHT; ///< Booting up
-//        uint32_t custom_mode = 0;                 ///< Custom mode, can be defined by user/adopter
-//        uint8_t system_state = MAV_STATE_STANDBY; ///< System ready for flight
+//       
 //        // Initialize the required buffers
 //       // mavlink_message_t msg;
 //        uint8_t buf[MAVLINK_MAX_PACKET_LEN];

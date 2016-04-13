@@ -1,4 +1,8 @@
 
+#include <FastSerial.h>
+
+
+
 /*
  * Welcome to MultiWii.
  *
