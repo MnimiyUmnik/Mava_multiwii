@@ -8,7 +8,7 @@
 #ifndef MAVLINK_HELPER
 #define MAVLINK_HELPER
 #endif
-
+#define MAVLINK_USE_CONVENIENCE_FUNCTIONS
 /*
   internal function to give access to the channel status for each channel
  */
@@ -113,8 +113,8 @@ MAVLINK_HELPER void _mav_finalize_message_chan_send(mavlink_channel_t chan, uint
 	buf[0] = MAVLINK_STX;
 	buf[1] = length;
 	buf[2] = status->current_tx_seq;
-	buf[3] = mavlink_system.sysid;
-	buf[4] = mavlink_system.compid;
+	buf[3] = 44;
+	buf[4] = 0;
 	buf[5] = msgid;
 	status->current_tx_seq++;
 
@@ -490,9 +490,16 @@ MAVLINK_HELPER uint8_t put_bitfield_n_by_index(int32_t b, uint8_t bits, uint8_t 
 // to send 1 byte at a time, or MAVLINK_SEND_UART_BYTES() to send a
 // whole packet at a time
 
-/*
+
 
 #include "mavlink_types.h"
+ void uart0_transmit( uint8_t data )
+{
+    while ( !( UCSR0A & (1<<UDRE0)) );        // Wait for empty transmit buffer
+    UCSR0A |= (1<<TXC0);                     // clear txc flag
+    UDR0 = data;                            // Put data into buffer, sends the data
+    //loop_until_bit_is_set(UCSR0A, TXC0);    // Wait while the buffer is shifted out
+}
 
 void comm_send_ch(mavlink_channel_t chan, uint8_t ch)
 {
@@ -500,12 +507,11 @@ void comm_send_ch(mavlink_channel_t chan, uint8_t ch)
     {
         uart0_transmit(ch);
     }
-    if (chan == MAVLINK_COMM_1)
-    {
-    	uart1_transmit(ch);
-    }
+    //if (chan == MAVLINK_COMM_1)
+    //{
+    //	uart1_transmit(ch);
+    //}
 }
- */
 
 MAVLINK_HELPER void _mavlink_send_uart(mavlink_channel_t chan, const char *buf, uint16_t len)
 {
