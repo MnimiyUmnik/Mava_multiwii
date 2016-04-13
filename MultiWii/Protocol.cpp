@@ -169,7 +169,8 @@ void serialCom() {
     calibratingA=512; 
   }
    mavlink_msg_heartbeat_send(MAVLINK_COMM_0, type, autopilot_type, system_mode, custom_mode, system_state);
-  
+  mavlink_msg_raw_imu_send(MAVLINK_COMM_0, millis(), att.angle[ROLL], att.angle[PITCH], 0, 1, 2, 3, 4, 5, 6);
+  mavlink_msg_attitude_send(MAVLINK_COMM_0, millis(), (float)(att.angle[ROLL]/573), (float)(att.angle[PITCH]/573), 0, 1, 2, 3);
   uint8_t c,n;  
   static uint8_t offset[UART_NUMBER];
   static uint8_t dataSize[UART_NUMBER];
