@@ -758,7 +758,7 @@
        * This will disable use of the GUI, winGUI, android apps and any other program that makes use of the MSP.
        * You must find another way (like LCD_CONF) to tune the parameters or live with the defaults.
        * If you run a LCD/OLED via i2c or serial/Bluetooth, this is safe to use */
-      #define SUPPRESS_ALL_SERIAL_MSP // saves approx 2700 bytes
+     // #define SUPPRESS_ALL_SERIAL_MSP // saves approx 2700 bytes
 
       /* Remove handling of other serial commands.
        * This includes navigating via serial the lcd.configuration menu, lcd.telemetry and permanent.log .
